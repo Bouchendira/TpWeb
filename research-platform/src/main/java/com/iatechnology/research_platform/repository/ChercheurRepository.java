@@ -7,6 +7,10 @@ import java.util.Optional;
 
 @Repository
 public interface ChercheurRepository extends JpaRepository<Chercheur, Long> {
-    List<Chercheur> findByNomContainingIgnoreCase(String nom);
+     // Used by searchByNom — searches both nom AND prenom fields
+    List<Chercheur> findByNomContainingIgnoreCaseOrPrenomContainingIgnoreCase(
+        String nom, String prenom);
+
+    // Used by findByDomaine
     List<Chercheur> findByDomaineId(Long domaineId);
 }
