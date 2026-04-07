@@ -5,17 +5,23 @@ import lombok.Data;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 @Data
 public class PublicationRequest {
+
     @NotBlank(message = "Le titre est obligatoire")
     private String titre;
 
     private String resume;
-    private String motsCles;
+
+    private List<String> motsCles;
+
     private String doi;
-    private String fichierPdf;
+
+    private MultipartFile fichierPdf;
+
     private LocalDate datePublication;
 
-    // List of chercheur IDs to associate — at least one required
     private List<Long> chercheurIds;
 }

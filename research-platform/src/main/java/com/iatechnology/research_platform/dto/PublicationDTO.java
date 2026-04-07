@@ -8,7 +8,7 @@ public class PublicationDTO {
     private Long id;
     private String titre;
     private String resume;
-    private String motsCles;
+    private List<String> motsCles;
     private String doi;
     private String fichierPdf;
     private LocalDate datePublication;

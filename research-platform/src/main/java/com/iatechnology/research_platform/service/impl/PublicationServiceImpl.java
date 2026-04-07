@@ -7,7 +7,13 @@ import com.iatechnology.research_platform.entity.Publication;
 import com.iatechnology.research_platform.entity.StatutPublication;
 import com.iatechnology.research_platform.repository.ChercheurRepository;
 import com.iatechnology.research_platform.repository.PublicationRepository;
+import com.iatechnology.research_platform.service.impl.GroqService;
+import com.iatechnology.research_platform.service.impl.PdfService;
 import com.iatechnology.research_platform.service.PublicationService;
+import com.iatechnology.research_platform.service.impl.SupabaseStorageService;
+
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +31,15 @@ public class PublicationServiceImpl implements PublicationService {
 
     @Autowired
     private ChercheurRepository chercheurRepository;
+
+    @Autowired
+    private SupabaseStorageService supabaseStorageService;
+    @Autowired
+    private PdfService pdfService;
+
+    @Autowired
+    private GroqService groqService;
+
 
     // ─── Mapping helpers ────────────────────────────────────────────────────
 
@@ -147,38 +162,115 @@ public class PublicationServiceImpl implements PublicationService {
     // ─── Admin only use cases ────────────────────────────────────────────────
 
     // Spec: "Ajout" — "Association à un ou plusieurs chercheurs"
-    @Override
-    public PublicationResponse create(PublicationRequest request) {
-        Publication publication = new Publication();
-        publication.setTitre(request.getTitre());
-        publication.setResume(request.getResume());
-        publication.setMotsCles(request.getMotsCles());
-        publication.setDoi(request.getDoi());
-        publication.setFichierPdf(request.getFichierPdf());
-        publication.setDatePublication(request.getDatePublication());
-        publication.setStatut(StatutPublication.EN_ATTENTE);
 
-        // Spec: "Association à un ou plusieurs chercheurs"
-        publication.setChercheurs(resolveChercheurs(request.getChercheurIds()));
+@Override
+public PublicationResponse create(PublicationRequest request) {
 
-        return toResponse(publicationRepository.save(publication));
+    if (request.getFichierPdf() == null || request.getFichierPdf().isEmpty()) {
+        throw new RuntimeException("PDF obligatoire");
     }
 
+    Publication publication = new Publication();
+    publication.setTitre(request.getTitre());
+    publication.setDoi(request.getDoi());
+
+    String text = pdfService.extractText(request.getFichierPdf());
+
+    String summary = groqService.summarizeLargeText(text);
+
+    List<String> keywords = groqService.extractKeywords(summary);
+
+    publication.setResume(summary);
+    publication.setMotsCles(keywords);
+
+   /*  try {
+        List<byte[]> images =
+                pdfService.extractImages(request.getFichierPdf());
+
+        List<String> imageSummaries = new ArrayList<>();
+
+        if (images != null && !images.isEmpty()) {
+            for (byte[] img : images) {
+
+                String imgSummary = groqService.summarizeImage(img);
+                imageSummaries.add(imgSummary);
+            }
+        }
+
+        // Optional: merge image insights into resume
+        if (!imageSummaries.isEmpty()) {
+            summary += "\n\nImage Analysis:\n" + String.join("\n", imageSummaries);
+            publication.setResume(summary);
+        }
+
+    } catch (Exception e) {
+        System.out.println("Image extraction skipped: " + e.getMessage());
+    }*/
+    try {
+        String doi = request.getDoi();
+
+        publication.setFichierPdf(
+            supabaseStorageService.uploadFile(request.getFichierPdf(), doi)
+        );
+
+    } catch (IOException e) {
+        throw new RuntimeException("Erreur upload PDF", e);
+    }
+
+    // ==============================
+    // 6. METADATA
+    // ==============================
+    publication.setDatePublication(request.getDatePublication());
+    publication.setStatut(StatutPublication.EN_ATTENTE);
+
+    publication.setChercheurs(resolveChercheurs(request.getChercheurIds()));
+
+    return toResponse(publicationRepository.save(publication));
+}
+
     // Spec: "Modification"
-    @Override
+
+   @Override
     public PublicationResponse update(Long id, PublicationRequest request) {
+
         Publication publication = publicationRepository.findById(id)
             .orElseThrow(() -> new RuntimeException(
                 "Publication non trouvée avec l'id: " + id));
 
+        // Update basic fields
         publication.setTitre(request.getTitre());
         publication.setResume(request.getResume());
-        publication.setMotsCles(request.getMotsCles());
         publication.setDoi(request.getDoi());
-        publication.setFichierPdf(request.getFichierPdf());
         publication.setDatePublication(request.getDatePublication());
 
-        // Update chercheur associations if provided
+        // ✅ If new PDF is uploaded → replace it
+        if (request.getFichierPdf() != null && !request.getFichierPdf().isEmpty()) {
+            try {
+                String fileName = request.getFichierPdf().getOriginalFilename();
+
+                fileName = fileName
+                .replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+                String fileUrl = supabaseStorageService.uploadFile(
+                    request.getFichierPdf(),
+                    fileName
+                );
+
+                publication.setFichierPdf(fileUrl);
+
+                // OPTIONAL: reprocess AI (recommended)
+                String text = pdfService.extractText(request.getFichierPdf());
+                String summary = groqService.summarizeLargeText(text);
+                List<String> keywords = groqService.extractKeywords(summary);
+
+                publication.setResume(summary);
+                publication.setMotsCles(keywords);
+
+            } catch (IOException e) {
+                throw new RuntimeException("Erreur upload PDF", e);
+            }
+        }
+
+        // ✅ Update chercheurs if provided
         if (request.getChercheurIds() != null && !request.getChercheurIds().isEmpty()) {
             publication.setChercheurs(resolveChercheurs(request.getChercheurIds()));
         }

@@ -4,6 +4,8 @@ import lombok.Data;
 import java.time.LocalDate;
 import java.util.List;
 
+//import org.springframework.web.multipart.MultipartFile;
+
 @Entity
 @Table(name = "publications")
 @Data
@@ -18,7 +20,13 @@ public class Publication {
     @Column(columnDefinition = "TEXT")
     private String resume;
 
-    private String motsCles;
+    @ElementCollection
+    @CollectionTable(
+        name = "publication_mots_cles",
+        joinColumns = @JoinColumn(name = "publication_id")
+    )
+    @Column(name = "mot_cle")
+    private List<String> motsCles;
     private String doi;
     private String fichierPdf;
     private LocalDate datePublication;
