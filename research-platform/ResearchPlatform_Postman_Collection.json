@@ -1,0 +1,1455 @@
+{
+  "info": {
+    "name": "Research Platform API Collection",
+    "description": "Complete Postman collection for testing all Research Platform API endpoints. Includes authentication, domain management, researcher management, publication management with highlighting, news/announcements management, and file upload. Each request includes notes on required authentication, parameters, and expected responses.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "User Registration - Success",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "signup"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User registered successfully\"\n}"
+            },
+            {
+              "name": "Username Taken",
+              "originalRequest": {},
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Username already taken\"\n}"
+            },
+            {
+              "name": "Email Taken",
+              "originalRequest": {},
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Email already used\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "User Login - Success",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "signin"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"type\": \"Bearer\",\n  \"id\": 1,\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"roles\": [\"ROLE_USER\"]\n}"
+            },
+            {
+              "name": "Invalid Credentials",
+              "originalRequest": {},
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 401,\n  \"error\": \"Unauthorized\",\n  \"message\": \"Bad credentials\",\n  \"path\": \"/api/auth/signin\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Domaines",
+      "item": [
+        {
+          "name": "Get All Domaines",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/domaines",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "domaines"]
+            },
+            "description": "Public endpoint - no authentication required. Returns all research domains."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"nom\": \"Computer Science\",\n    \"description\": \"Study of computation and information\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Domaine by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/domaines/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "domaines", "1"]
+            },
+            "description": "Public endpoint - no authentication required."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"nom\": \"Computer Science\",\n  \"description\": \"Study of computation and information\"\n}"
+            },
+            {
+              "name": "Not Found",
+              "originalRequest": {},
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Search Domaines",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/domaines/search?nom=Computer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "domaines", "search"],
+              "query": [
+                {
+                  "key": "nom",
+                  "value": "Computer"
+                }
+              ]
+            },
+            "description": "Public endpoint - no authentication required."
+          }
+        },
+        {
+          "name": "Create Domaine",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"New Domain\",\n  \"description\": \"Description of new domain\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/domaines",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "domaines"]
+            },
+            "description": "Requires ADMIN role. Set Authorization header with Bearer token."
+          },
+          "response": [
+            {
+              "name": "Created",
+              "originalRequest": {},
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 2,\n  \"nom\": \"New Domain\",\n  \"description\": \"Description of new domain\"\n}"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {},
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 401,\n  \"error\": \"Unauthorized\",\n  \"message\": \"Full authentication is required to access this resource\",\n  \"path\": \"/api/domaines\"\n}"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {},
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 403,\n  \"error\": \"Forbidden\",\n  \"message\": \"Access Denied\",\n  \"path\": \"/api/domaines\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Domaine",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Updated Domain\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/domaines/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "domaines", "1"]
+            },
+            "description": "Requires ADMIN role. Set Authorization header with Bearer token."
+          }
+        },
+        {
+          "name": "Delete Domaine",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/domaines/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "domaines", "1"]
+            },
+            "description": "Requires ADMIN role. Set Authorization header with Bearer token."
+          },
+          "response": [
+            {
+              "name": "No Content",
+              "originalRequest": {},
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "text",
+              "header": [],
+              "cookie": [],
+              "body": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Chercheurs",
+      "item": [
+        {
+          "name": "Get All Chercheurs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chercheurs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chercheurs"]
+            },
+            "description": "Public endpoint - no authentication required."
+          }
+        },
+        {
+          "name": "Get Chercheur by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chercheurs/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chercheurs", "1"]
+            },
+            "description": "Public endpoint - no authentication required."
+          }
+        },
+        {
+          "name": "Search Chercheurs by Name",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chercheurs/search?nom=John",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chercheurs", "search"],
+              "query": [
+                {
+                  "key": "nom",
+                  "value": "John"
+                }
+              ]
+            },
+            "description": "Requires authentication. Set Authorization header with Bearer token."
+          }
+        },
+        {
+          "name": "Get Chercheurs by Domaine",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chercheurs/domaine/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chercheurs", "domaine", "1"]
+            },
+            "description": "Requires authentication. Set Authorization header with Bearer token."
+          }
+        },
+        {
+          "name": "Create Chercheur",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Doe\",\n  \"prenom\": \"John\",\n  \"email\": \"john.doe@example.com\",\n  \"telephone\": \"+1234567890\",\n  \"grade\": \"Professor\",\n  \"domaineId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chercheurs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chercheurs"]
+            },
+            "description": "Requires ADMIN role. Set Authorization header with Bearer token."
+          }
+        },
+        {
+          "name": "Update Chercheur",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Doe\",\n  \"prenom\": \"Jane\",\n  \"email\": \"jane.doe@example.com\",\n  \"telephone\": \"+1234567890\",\n  \"grade\": \"Associate Professor\",\n  \"domaineId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chercheurs/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chercheurs", "1"]
+            },
+            "description": "Requires ADMIN role. Set Authorization header with Bearer token."
+          }
+        },
+        {
+          "name": "Delete Chercheur",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chercheurs/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chercheurs", "1"]
+            },
+            "description": "Requires ADMIN role. Set Authorization header with Bearer token."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Publications",
+      "item": [
+        {
+          "name": "Get Published Publications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/publications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "publications"]
+            },
+            "description": "Public endpoint - no authentication required. Returns only PUBLISHED publications."
+          }
+        },
+        {
+          "name": "Get Highlighted Publications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/publications/highlighted",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "publications", "highlighted"]
+            },
+            "description": "Public endpoint - no authentication required. Returns published publications marked for homepage highlighting."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"titre\": \"Groundbreaking AI Research\",\n    \"resume\": \"Our latest publication on artificial intelligence...\",\n    \"motsCles\": [\"AI\", \"machine learning\"],\n    \"doi\": \"10.1000/example\",\n    \"fichierPdf\": \"https://storage.example.com/file.pdf\",\n    \"datePublication\": \"2024-01-15\",\n    \"statut\": \"PUBLIE\",\n    \"mettreEnAvant\": true,\n    \"chercheurs\": [\n      {\n        \"id\": 1,\n        \"nom\": \"Doe\",\n        \"prenom\": \"John\",\n        \"domaineNom\": \"Computer Science\"\n      }\n    ]\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Publication by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/publications/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "publications", "1"]
+            },
+            "description": "Public endpoint - no authentication required."
+          }
+        },
+        {
+          "name": "Search Publications by Keywords",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/publications/search?q=machine%20learning",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "publications", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "machine learning"
+                }
+              ]
+            },
+            "description": "Requires authentication. Set Authorization header with Bearer token."
+          }
+        },
+        {
+          "name": "Get Publications by Chercheur",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/publications/chercheur/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "publications", "chercheur", "1"]
+            },
+            "description": "Requires authentication. Set Authorization header with Bearer token."
+          }
+        },
+        {
+          "name": "Get Publications by Domaine",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/publications/domaine/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "publications", "domaine", "1"]
+            },
+            "description": "Requires authentication. Set Authorization header with Bearer token."
+          }
+        },
+        {
+          "name": "Get All Publications (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/publications/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "publications", "all"]
+            },
+            "description": "Requires ADMIN role. Set Authorization header with Bearer token. Returns all publications including EN_ATTENTE and ARCHIVE."
+          }
+        },
+        {
+          "name": "Create Publication",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "titre",
+                  "value": "New Publication Title",
+                  "type": "text"
+                },
+                {
+                  "key": "resume",
+                  "value": "Publication abstract",
+                  "type": "text"
+                },
+                {
+                  "key": "motsCles",
+                  "value": "keyword1, keyword2",
+                  "type": "text"
+                },
+                {
+                  "key": "doi",
+                  "value": "10.1000/example",
+                  "type": "text"
+                },
+                {
+                  "key": "chercheurIds",
+                  "value": "1,2",
+                  "type": "text"
+                },
+                {
+                  "key": "mettreEnAvant",
+                  "value": "false",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/publications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "publications"]
+            },
+            "description": "Requires ADMIN role. Set Authorization header with Bearer token. Uses multipart/form-data for file upload."
+          }
+        },
+        {
+          "name": "Update Publication",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Updated Title\",\n  \"resume\": \"Updated abstract\",\n  \"motsCles\": \"updated, keywords\",\n  \"doi\": \"10.1000/updated\",\n  \"mettreEnAvant\": true,\n  \"chercheurIds\": [1, 2]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/publications/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "publications", "1"]
+            },
+            "description": "Requires ADMIN role. Set Authorization header with Bearer token."
+          }
+        },
+        {
+          "name": "Delete Publication",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/publications/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "publications", "1"]
+            },
+            "description": "Requires ADMIN role. Set Authorization header with Bearer token."
+          }
+        },
+        {
+          "name": "Update Publication Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"PUBLIE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/publications/1/statut",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "publications", "1", "statut"]
+            },
+            "description": "Requires ADMIN role. Set Authorization header with Bearer token. Valid statuses: EN_ATTENTE, PUBLIE, ARCHIVE."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Actualites",
+      "item": [
+        {
+          "name": "Get All Actualites",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moderatorToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/actualites",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actualites"]
+            },
+            "description": "Requires MODERATEUR or ADMIN role. Returns all news/announcements."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"titre\": \"New Research Grant Available\",\n    \"contenu\": \"We are pleased to announce a new research grant opportunity...\",\n    \"dateCreation\": \"2024-01-15T10:30:00\",\n    \"afficherAccueil\": true\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Actualites for Homepage",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/actualites/accueil",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actualites", "accueil"]
+            },
+            "description": "Public endpoint - no authentication required. Returns news/announcements marked for homepage display."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"titre\": \"New Research Grant Available\",\n    \"contenu\": \"We are pleased to announce a new research grant opportunity...\",\n    \"dateCreation\": \"2024-01-15T10:30:00\",\n    \"afficherAccueil\": true\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Actualite by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moderatorToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/actualites/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actualites", "1"]
+            },
+            "description": "Requires MODERATEUR or ADMIN role. Returns a specific news/announcement by ID."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"titre\": \"New Research Grant Available\",\n  \"contenu\": \"We are pleased to announce a new research grant opportunity...\",\n  \"dateCreation\": \"2024-01-15T10:30:00\",\n  \"afficherAccueil\": true\n}"
+            },
+            {
+              "name": "Not Found",
+              "originalRequest": {},
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 404,\n  \"error\": \"Not Found\",\n  \"message\": \"Actualite not found with id: 1\",\n  \"path\": \"/api/actualites/1\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Actualite",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moderatorToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"New Research Grant Available\",\n  \"contenu\": \"We are pleased to announce a new research grant opportunity for researchers in the field of artificial intelligence. The grant provides up to $50,000 for innovative projects.\",\n  \"afficherAccueil\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/actualites",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actualites"]
+            },
+            "description": "Requires MODERATEUR or ADMIN role. Creates a new news/announcement."
+          },
+          "response": [
+            {
+              "name": "Created",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"titre\": \"New Research Grant Available\",\n  \"contenu\": \"We are pleased to announce a new research grant opportunity for researchers in the field of artificial intelligence. The grant provides up to $50,000 for innovative projects.\",\n  \"dateCreation\": \"2024-01-15T10:30:00\",\n  \"afficherAccueil\": true\n}"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {},
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 401,\n  \"error\": \"Unauthorized\",\n  \"message\": \"Full authentication is required to access this resource\",\n  \"path\": \"/api/actualites\"\n}"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {},
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 403,\n  \"error\": \"Forbidden\",\n  \"message\": \"Access Denied\",\n  \"path\": \"/api/actualites\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Actualite",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moderatorToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Updated: New Research Grant Available\",\n  \"contenu\": \"We are pleased to announce a new research grant opportunity for researchers in the field of artificial intelligence. The grant provides up to $75,000 for innovative projects.\",\n  \"afficherAccueil\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/actualites/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actualites", "1"]
+            },
+            "description": "Requires MODERATEUR or ADMIN role. Updates an existing news/announcement."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"titre\": \"Updated: New Research Grant Available\",\n  \"contenu\": \"We are pleased to announce a new research grant opportunity for researchers in the field of artificial intelligence. The grant provides up to $75,000 for innovative projects.\",\n  \"dateCreation\": \"2024-01-15T10:30:00\",\n  \"afficherAccueil\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Actualite",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moderatorToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/actualites/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actualites", "1"]
+            },
+            "description": "Requires MODERATEUR or ADMIN role. Deletes a news/announcement."
+          },
+          "response": [
+            {
+              "name": "No Content",
+              "originalRequest": {},
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Upload",
+      "item": [
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload"]
+            },
+            "description": "Requires ADMIN role. Set Authorization header with Bearer token. Uploads file to Supabase storage."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Setup Data",
+      "item": [
+        {
+          "name": "Create Domaine - Computer Science",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Computer Science\",\n  \"description\": \"Study of computation and information systems.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/domaines",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "domaines"]
+            }
+          }
+        },
+        {
+          "name": "Create Domaine - Data Science",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Data Science\",\n  \"description\": \"Analytics, statistics, and machine learning for real-world applications.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/domaines",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "domaines"]
+            }
+          }
+        },
+        {
+          "name": "Create Domaine - Artificial Intelligence",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Artificial Intelligence\",\n  \"description\": \"Research on intelligent systems, machine learning, and automation.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/domaines",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "domaines"]
+            }
+          }
+        },
+        {
+          "name": "Create Chercheur - Alice Smith",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Smith\",\n  \"prenom\": \"Alice\",\n  \"email\": \"alice.smith@example.com\",\n  \"biographie\": \"Senior researcher in AI and machine learning.\",\n  \"domaineId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chercheurs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chercheurs"]
+            }
+          }
+        },
+        {
+          "name": "Create Chercheur - Bob Martin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Martin\",\n  \"prenom\": \"Bob\",\n  \"email\": \"bob.martin@example.com\",\n  \"biographie\": \"Data science specialist focused on healthcare analytics.\",\n  \"domaineId\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chercheurs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chercheurs"]
+            }
+          }
+        },
+        {
+          "name": "Create Publication - AI Research Advances",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "titre",
+                  "value": "AI Research Advances",
+                  "type": "text"
+                },
+                {
+                  "key": "resume",
+                  "value": "A deep dive into advances in artificial intelligence.",
+                  "type": "text"
+                },
+                {
+                  "key": "motsCles",
+                  "value": "AI",
+                  "type": "text"
+                },
+                {
+                  "key": "motsCles",
+                  "value": "Machine Learning",
+                  "type": "text"
+                },
+                {
+                  "key": "doi",
+                  "value": "10.1000/ai.2026.001",
+                  "type": "text"
+                },
+                {
+                  "key": "datePublication",
+                  "value": "2026-04-18",
+                  "type": "text"
+                },
+                {
+                  "key": "mettreEnAvant",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "chercheurIds",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/publications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "publications"]
+            }
+          }
+        },
+        {
+          "name": "Create Publication - Data Science in Healthcare",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "titre",
+                  "value": "Data Science in Healthcare",
+                  "type": "text"
+                },
+                {
+                  "key": "resume",
+                  "value": "Using analytics to improve patient outcomes.",
+                  "type": "text"
+                },
+                {
+                  "key": "motsCles",
+                  "value": "Healthcare",
+                  "type": "text"
+                },
+                {
+                  "key": "motsCles",
+                  "value": "Data Science",
+                  "type": "text"
+                },
+                {
+                  "key": "doi",
+                  "value": "10.1000/ds.2026.002",
+                  "type": "text"
+                },
+                {
+                  "key": "datePublication",
+                  "value": "2026-04-10",
+                  "type": "text"
+                },
+                {
+                  "key": "mettreEnAvant",
+                  "value": "false",
+                  "type": "text"
+                },
+                {
+                  "key": "chercheurIds",
+                  "value": "2",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/publications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "publications"]
+            }
+          }
+        },
+        {
+          "name": "Create Actualite - Research Grant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Research Grant Available\",\n  \"contenu\": \"A new research grant is available for AI and data science projects.\",\n  \"afficherAccueil\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/actualites",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actualites"]
+            }
+          }
+        },
+        {
+          "name": "Create Actualite - Conference Announcement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Upcoming AI Conference\",\n  \"contenu\": \"Join the annual conference on artificial intelligence and innovation.\",\n  \"afficherAccueil\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/actualites",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actualites"]
+            }
+          }
+        },
+        {
+          "name": "Create User - newuser",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newuser\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "signup"]
+            }
+          }
+        },
+        {
+          "name": "Create User - janeuser",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"janeuser\",\n  \"email\": \"janeuser@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "signup"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "userToken",
+      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwiaWF0IjoxNzc2NTE1MjIyLCJleHAiOjE3NzY2MDE2MjJ9.2tYAXcB-kIRKGtpK8SVYpiZdT8HOLC7LSx9YyZwyIB",
+      "type": "string"
+    },
+    {
+      "key": "moderatorToken",
+      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjaGVyIiwiaWF0IjoxNzc2NTE1MjUyLCJleHAiOjE3NzY2MDE2NTJ9.TLFb9jIyvLo9FR6gJmeDbdYWhZ2O7UGksx5lDExdJoA",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXJpZW0iLCJpYXQiOjE3NzY1MTUyODMsImV4cCI6MTc3NjYwMTY4M30.3eH2ZSfNErujDW80GQ3y1BvwRsk6n563oVRRGerUjvg",
+      "type": "string"
+    },
+    {
+      "key": "domainId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "researcherId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "publicationId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "actualiteId",
+      "value": "1",
+      "type": "string"
+    }
+  ]
+}

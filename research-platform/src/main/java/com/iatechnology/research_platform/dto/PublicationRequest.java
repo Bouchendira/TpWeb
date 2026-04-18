@@ -23,5 +23,7 @@ public class PublicationRequest {
 
     private LocalDate datePublication;
 
+    private boolean mettreEnAvant = false;
+
     private List<Long> chercheurIds;
 }

@@ -2,6 +2,7 @@ package com.iatechnology.research_platform.controller;
 
 import java.io.IOException;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +22,7 @@ public class UploadController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public String upload(@RequestParam("file") MultipartFile file) throws IOException {
 
         String fileName = file.getOriginalFilename();

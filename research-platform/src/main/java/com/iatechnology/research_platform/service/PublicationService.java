@@ -21,6 +21,9 @@ public interface PublicationService {
     // Spec: "Recherche par domaine" — find publications in a research domain
     List<PublicationResponse> findByDomaine(Long domaineId);
 
+    // Public access — for homepage highlighted publications
+    List<PublicationResponse> findHighlighted();
+
     // Admin only — spec: "Ajout, modification et suppression"
     PublicationResponse create(PublicationRequest request);
     PublicationResponse update(Long id, PublicationRequest request);

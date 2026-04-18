@@ -53,6 +53,7 @@ public class PublicationServiceImpl implements PublicationService {
         dto.setFichierPdf(p.getFichierPdf());
         dto.setDatePublication(p.getDatePublication());
         dto.setStatut(p.getStatut());
+        dto.setMettreEnAvant(p.isMettreEnAvant());
 
         // Map each chercheur to a brief summary — breaks the circular reference
         if (p.getChercheurs() != null) {
@@ -159,6 +160,16 @@ public class PublicationServiceImpl implements PublicationService {
             .collect(Collectors.toList());
     }
 
+    // Public access — for homepage highlighted publications
+    @Override
+    @Transactional(readOnly = true)
+    public List<PublicationResponse> findHighlighted() {
+        return publicationRepository.findByMettreEnAvantTrueAndStatut(StatutPublication.PUBLIE)
+            .stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+
     // ─── Admin only use cases ────────────────────────────────────────────────
 
     // Spec: "Ajout" — "Association à un ou plusieurs chercheurs"
@@ -222,6 +233,7 @@ public PublicationResponse create(PublicationRequest request) {
     // ==============================
     publication.setDatePublication(request.getDatePublication());
     publication.setStatut(StatutPublication.EN_ATTENTE);
+    publication.setMettreEnAvant(request.isMettreEnAvant());
 
     publication.setChercheurs(resolveChercheurs(request.getChercheurIds()));
 
@@ -242,6 +254,7 @@ public PublicationResponse create(PublicationRequest request) {
         publication.setResume(request.getResume());
         publication.setDoi(request.getDoi());
         publication.setDatePublication(request.getDatePublication());
+        publication.setMettreEnAvant(request.isMettreEnAvant());
 
         // ✅ If new PDF is uploaded → replace it
         if (request.getFichierPdf() != null && !request.getFichierPdf().isEmpty()) {

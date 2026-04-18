@@ -28,6 +28,12 @@ public class PublicationController {
         return ResponseEntity.ok(publicationService.findPublished());
     }
 
+    // Returns highlighted publications for homepage
+    @GetMapping("/highlighted")
+    public ResponseEntity<List<PublicationResponse>> getHighlighted() {
+        return ResponseEntity.ok(publicationService.findHighlighted());
+    }
+
     // Anyone can read a single publication
     @GetMapping("/{id}")
     public ResponseEntity<PublicationResponse> getById(@PathVariable Long id) {
@@ -38,7 +44,7 @@ public class PublicationController {
 
     // Spec: "Recherche par mots-clés"
     @GetMapping("/search")
-    //@PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<PublicationResponse>> searchByMotsCles(
             @RequestParam String q) {
         return ResponseEntity.ok(publicationService.searchByMotsCles(q));
@@ -46,7 +52,7 @@ public class PublicationController {
 
     // Spec: "Consultation des publications d'un chercheur"
     @GetMapping("/chercheur/{chercheurId}")
-    //@PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<PublicationResponse>> getByChercheur(
             @PathVariable Long chercheurId) {
         return ResponseEntity.ok(publicationService.findByChercheur(chercheurId));
@@ -54,7 +60,7 @@ public class PublicationController {
 
     // Spec: "Recherche par domaine"
     @GetMapping("/domaine/{domaineId}")
-    //@PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<PublicationResponse>> getByDomaine(
             @PathVariable Long domaineId) {
         return ResponseEntity.ok(publicationService.findByDomaine(domaineId));
@@ -64,14 +70,14 @@ public class PublicationController {
 
     // Admin sees ALL publications including EN_ATTENTE and ARCHIVE
     @GetMapping("/all")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<PublicationResponse>> getAll() {
         return ResponseEntity.ok(publicationService.findAll());
     }
 
     // Spec: "Ajout" + "Association à un ou plusieurs chercheurs" + "Upload DOI"
     @PostMapping(consumes = "multipart/form-data")
-    ////@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PublicationResponse> create(
             @Valid  @ModelAttribute  PublicationRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -80,7 +86,7 @@ public class PublicationController {
 
     // Spec: "Modification"
     @PutMapping("/{id}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PublicationResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody PublicationRequest request) {
@@ -89,7 +95,7 @@ public class PublicationController {
 
     // Spec: "Suppression"
     @DeleteMapping("/{id}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         publicationService.delete(id);
         return ResponseEntity.noContent().build();
@@ -97,7 +103,7 @@ public class PublicationController {
 
     // Spec: publication workflow management EN_ATTENTE → PUBLIE → ARCHIVE
     @PatchMapping("/{id}/statut")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PublicationResponse> changeStatut(
             @PathVariable Long id,
             @RequestParam StatutPublication statut) {
