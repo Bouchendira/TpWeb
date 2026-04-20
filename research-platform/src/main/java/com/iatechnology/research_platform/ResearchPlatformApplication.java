@@ -4,6 +4,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import com.iatechnology.research_platform.entity.ERole;
@@ -12,6 +13,7 @@ import com.iatechnology.research_platform.repository.RoleRepository;
 
 @SpringBootApplication
 @EnableMethodSecurity
+@EnableAsync
 public class ResearchPlatformApplication {
 
 	public static void main(String[] args) {

@@ -7,7 +7,7 @@ import com.iatechnology.research_platform.entity.Publication;
 import com.iatechnology.research_platform.entity.StatutPublication;
 import com.iatechnology.research_platform.repository.ChercheurRepository;
 import com.iatechnology.research_platform.repository.PublicationRepository;
-import com.iatechnology.research_platform.service.impl.GroqService;
+import com.iatechnology.research_platform.service.impl.SummarizeService;
 import com.iatechnology.research_platform.service.impl.PdfService;
 import com.iatechnology.research_platform.service.PublicationService;
 import com.iatechnology.research_platform.service.impl.SupabaseStorageService;
@@ -38,7 +38,9 @@ public class PublicationServiceImpl implements PublicationService {
     private PdfService pdfService;
 
     @Autowired
-    private GroqService groqService;
+    private SummarizeService summarizeService;
+    @Autowired
+    private PublicationAsyncService asyncProcessor;
 
 
     // ─── Mapping helpers ────────────────────────────────────────────────────
@@ -163,70 +165,48 @@ public class PublicationServiceImpl implements PublicationService {
 
     // Spec: "Ajout" — "Association à un ou plusieurs chercheurs"
 
-@Override
-public PublicationResponse create(PublicationRequest request) {
+    @Override
+    public PublicationResponse create(PublicationRequest request) {
 
-    if (request.getFichierPdf() == null || request.getFichierPdf().isEmpty()) {
-        throw new RuntimeException("PDF obligatoire");
-    }
-
-    Publication publication = new Publication();
-    publication.setTitre(request.getTitre());
-    publication.setDoi(request.getDoi());
-
-    String text = pdfService.extractText(request.getFichierPdf());
-
-    String summary = groqService.summarizeLargeText(text);
-
-    List<String> keywords = groqService.extractKeywords(summary);
-
-    publication.setResume(summary);
-    publication.setMotsCles(keywords);
-
-   /*  try {
-        List<byte[]> images =
-                pdfService.extractImages(request.getFichierPdf());
-
-        List<String> imageSummaries = new ArrayList<>();
-
-        if (images != null && !images.isEmpty()) {
-            for (byte[] img : images) {
-
-                String imgSummary = groqService.summarizeImage(img);
-                imageSummaries.add(imgSummary);
-            }
+        if (request.getFichierPdf() == null || request.getFichierPdf().isEmpty()) {
+            throw new RuntimeException("PDF obligatoire");
         }
 
-        // Optional: merge image insights into resume
-        if (!imageSummaries.isEmpty()) {
-            summary += "\n\nImage Analysis:\n" + String.join("\n", imageSummaries);
-            publication.setResume(summary);
+        Publication publication = new Publication();
+        publication.setTitre(request.getTitre());
+        publication.setDoi(request.getDoi());
+        publication.setDatePublication(request.getDatePublication());
+        publication.setStatut(StatutPublication.EN_ATTENTE);
+        publication.setChercheurs(resolveChercheurs(request.getChercheurIds()));
+
+        // 1. Extract bytes IMMEDIATELY before the MultipartFile stream is destroyed
+        byte[] fileBytes;
+        try {
+            fileBytes = request.getFichierPdf().getBytes();
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur de lecture du PDF", e);
         }
 
-    } catch (Exception e) {
-        System.out.println("Image extraction skipped: " + e.getMessage());
-    }*/
-    try {
-        String doi = request.getDoi();
+        // 2. Upload to Supabase Synchronously
+        try {
+            String doi = request.getDoi();
+            publication.setFichierPdf(
+                supabaseStorageService.uploadFile(request.getFichierPdf(), doi)
+            );
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur upload PDF vers Supabase", e);
+        }
 
-        publication.setFichierPdf(
-            supabaseStorageService.uploadFile(request.getFichierPdf(), doi)
-        );
+        // 3. Save to database to generate the ID
+        Publication savedPublication = publicationRepository.save(publication);
 
-    } catch (IOException e) {
-        throw new RuntimeException("Erreur upload PDF", e);
+        // 4. Trigger the background AI processing
+        // This runs in a separate thread, so it won't block the return statement below
+        asyncProcessor.processAiMetadata(savedPublication.getId(), fileBytes);
+
+        // 5. Return the response instantly to the frontend
+        return toResponse(savedPublication);
     }
-
-    // ==============================
-    // 6. METADATA
-    // ==============================
-    publication.setDatePublication(request.getDatePublication());
-    publication.setStatut(StatutPublication.EN_ATTENTE);
-
-    publication.setChercheurs(resolveChercheurs(request.getChercheurIds()));
-
-    return toResponse(publicationRepository.save(publication));
-}
 
     // Spec: "Modification"
 
@@ -259,8 +239,8 @@ public PublicationResponse create(PublicationRequest request) {
 
                 // OPTIONAL: reprocess AI (recommended)
                 String text = pdfService.extractText(request.getFichierPdf());
-                String summary = groqService.summarizeLargeText(text);
-                List<String> keywords = groqService.extractKeywords(summary);
+                String summary = summarizeService.summarizeLargeText(text);
+                List<String> keywords = summarizeService.extractKeywords(summary);
 
                 publication.setResume(summary);
                 publication.setMotsCles(keywords);

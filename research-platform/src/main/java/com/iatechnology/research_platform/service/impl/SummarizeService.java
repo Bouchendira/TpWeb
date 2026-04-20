@@ -5,12 +5,15 @@ import java.util.regex.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 @Service
-public class GroqService {
+public class SummarizeService {
 
     @Value("${groq.api.key}")
     private String apiKey;
@@ -46,30 +49,40 @@ public class GroqService {
                 .filter(s -> !s.isEmpty())
                 .toList();
     }
-public String summarizeImage(byte[] image) {
+public String summarizeImage(byte[] imageBytes, String filename) {
 
     try {
-        String apiUrl = "https://router.huggingface.co/hf-inference/models/microsoft/git-base";
-        String apiKey = "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"; // ⚠️ put your real token
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setBearerAuth(apiKey);
-
-        HttpEntity<byte[]> request = new HttpEntity<>(image, headers);
+        String apiUrl = "http://127.0.0.1:8000/analyze";
 
         RestTemplate restTemplate = new RestTemplate();
 
-        ResponseEntity<List> response =
-                restTemplate.postForEntity(apiUrl, request, List.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        List<Map<String, Object>> body = response.getBody();
+        // Build multipart body
+        MultiValueMap<String, Object> body =
+                new LinkedMultiValueMap<>();
 
-        if (body == null || body.isEmpty()) {
+        body.add("file", new ByteArrayResource(imageBytes) {
+            @Override
+            public String getFilename() {
+                return filename != null ? filename : "image.jpg";
+            }
+        });
+
+        HttpEntity<MultiValueMap<String, Object>> request =
+                new HttpEntity<>(body, headers);
+
+        ResponseEntity<Map> response =
+                restTemplate.postForEntity(apiUrl, request, Map.class);
+
+        Map<String, Object> responseBody = response.getBody();
+
+        if (responseBody == null || !responseBody.containsKey("generated_text")) {
             return "No description generated";
         }
 
-        return body.get(0).get("generated_text").toString();
+        return responseBody.get("generated_text").toString();
 
     } catch (Exception e) {
         throw new RuntimeException("Erreur image AI: " + e.getMessage(), e);
@@ -152,6 +165,7 @@ public String summarizeImage(byte[] image) {
     return summarize(intermediateSummaries.toString());
 
     }
+   
     public List<String> extractKeywordsLargeText(String text) {
 
     List<String> chunks = splitText(text, 3000);
