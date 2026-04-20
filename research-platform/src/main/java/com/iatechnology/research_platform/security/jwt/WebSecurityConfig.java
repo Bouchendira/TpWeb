@@ -52,7 +52,7 @@ public class WebSecurityConfig {
             .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/auth/signin", "/api/auth/signup").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/domaines/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/chercheurs").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/upload").permitAll()

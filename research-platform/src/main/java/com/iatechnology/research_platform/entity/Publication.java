@@ -34,6 +34,9 @@ public class Publication {
     @Enumerated(EnumType.STRING)
     private StatutPublication statut = StatutPublication.EN_ATTENTE;
 
+    @Column(name = "mettre_en_avant")
+    private boolean mettreEnAvant = false;
+
     @ManyToMany
     @JoinTable(name = "publication_chercheurs",
         joinColumns = @JoinColumn(name = "publication_id"),

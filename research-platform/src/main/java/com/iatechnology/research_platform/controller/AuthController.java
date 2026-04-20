@@ -3,6 +3,8 @@ package com.iatechnology.research_platform.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import com.iatechnology.research_platform.dto.JwtResponse;
 import com.iatechnology.research_platform.dto.LoginRequest;
+import com.iatechnology.research_platform.dto.RoleRequest;
 import com.iatechnology.research_platform.dto.SignupRequest;
+import com.iatechnology.research_platform.dto.UserResponse;
 import com.iatechnology.research_platform.entity.ERole;
 import com.iatechnology.research_platform.entity.Role;
 import com.iatechnology.research_platform.entity.User;
@@ -91,18 +95,106 @@ public class AuthController {
         user.setEmail(signUpRequest.getEmail());
         user.setPassword(encoder.encode(signUpRequest.getPassword()));
 
-        // ================= ROLE HANDLING =================
-        Set<Role> roles = new HashSet<>();
-
-        // Always assign USER role automatically
-        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                .orElseThrow(() -> new RuntimeException("Error: ROLE_USER not found."));
-        roles.add(userRole);
-
-        user.setRoles(roles);
+        user.setRoles(buildRoles(null));
 
         userRepository.save(user);
 
         return ResponseEntity.ok(Map.of("message", "User registered successfully"));
+    }
+
+    // ================= ADMIN ACCOUNT MANAGEMENT =================
+
+    @GetMapping("/admin/users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserResponse>> listUsers() {
+        List<UserResponse> users = userRepository.findAll().stream()
+            .map(this::buildUserResponse)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/admin/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        return userRepository.findById(id)
+            .map(this::buildUserResponse)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/admin/users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> createUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("message", "Username already taken"));
+        }
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("message", "Email already used"));
+        }
+
+        User user = new User();
+        user.setUsername(signUpRequest.getUsername());
+        user.setEmail(signUpRequest.getEmail());
+        user.setPassword(encoder.encode(signUpRequest.getPassword()));
+        user.setRoles(buildRoles(signUpRequest.getRoles()));
+
+        userRepository.save(user);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(Map.of("message", "User created successfully"));
+    }
+
+    @DeleteMapping("/admin/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        if (!userRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        userRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/admin/users/{id}/roles")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateUserRoles(@PathVariable Long id,
+                                             @Valid @RequestBody RoleRequest roleRequest) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Error: User not found."));
+        user.setRoles(buildRoles(roleRequest.getRoles()));
+        userRepository.save(user);
+        return ResponseEntity.ok(Map.of("message", "Roles updated successfully"));
+    }
+
+    private Set<Role> buildRoles(Set<String> strRoles) {
+        Set<Role> roles = new HashSet<>();
+
+        if (strRoles == null || strRoles.isEmpty()) {
+            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("Error: ROLE_USER not found."));
+            roles.add(userRole);
+        } else {
+            strRoles.forEach(role -> {
+                switch (role.trim().toLowerCase()) {
+                    case "admin", "role_admin", "role-admin" -> roles.add(
+                        roleRepository.findByName(ERole.ROLE_ADMIN)
+                            .orElseThrow(() -> new RuntimeException("Error: ROLE_ADMIN not found.")));
+                    case "mod", "moderator", "role_moderator", "role-moderateur" -> roles.add(
+                        roleRepository.findByName(ERole.ROLE_MODERATEUR)
+                            .orElseThrow(() -> new RuntimeException("Error: ROLE_MODERATEUR not found.")));
+                    default -> roles.add(
+                        roleRepository.findByName(ERole.ROLE_USER)
+                            .orElseThrow(() -> new RuntimeException("Error: ROLE_USER not found.")));
+                }
+            });
+        }
+        return roles;
+    }
+
+    private UserResponse buildUserResponse(User user) {
+        List<String> roles = user.getRoles().stream()
+            .map(role -> role.getName().name())
+            .collect(Collectors.toList());
+        return new UserResponse(user.getId(), user.getUsername(), user.getEmail(), roles);
     }
 }

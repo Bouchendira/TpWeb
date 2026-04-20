@@ -21,4 +21,7 @@ public interface PublicationRepository extends JpaRepository<Publication, Long> 
 
     // Used by findByDomaine — navigates Publication → Chercheur → Domaine
     List<Publication> findByChercheurs_Domaine_Id(Long domaineId);
+
+    // Used by findHighlighted — for homepage featured publications
+    List<Publication> findByMettreEnAvantTrueAndStatut(StatutPublication statut);
 }

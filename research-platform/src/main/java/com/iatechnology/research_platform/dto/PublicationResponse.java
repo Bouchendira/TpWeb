@@ -15,6 +15,7 @@ public class PublicationResponse {
     private String fichierPdf;
     private LocalDate datePublication;
     private StatutPublication statut;
+    private boolean mettreEnAvant;
 
     // Flat chercheur info — no circular reference
     private List<ChercheurBriefDTO> chercheurs;
