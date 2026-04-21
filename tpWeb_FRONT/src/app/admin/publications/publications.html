@@ -1,0 +1,40 @@
+<h2>Ajouter une publication</h2>
+
+<input type="text" placeholder="Titre" [(ngModel)]="titre">
+<br>
+
+<input type="text" placeholder="DOI" [(ngModel)]="doi">
+<br>
+
+<input type="file" (change)="onFileSelected($event)">
+<br>
+
+<button (click)="upload()">
+  Upload PDF
+</button>
+
+<hr>
+
+<h2>Liste Publications</h2>
+
+<div *ngFor="let pub of publications">
+  <h3>{{ pub.titre }}</h3>
+
+  <p>{{ pub.doi }}</p>
+
+  <button (click)="openPdf(pub)">PDF</button>
+</div>
+
+<hr>
+
+<div *ngIf="selectedPdf">
+  <button (click)="selectedPdf=null">Fermer</button>
+
+  <iframe
+    [src]="selectedPdf"
+    width="100%"
+    height="600px">
+  </iframe>
+
+  <pre>{{ publications | json }}</pre>
+</div>

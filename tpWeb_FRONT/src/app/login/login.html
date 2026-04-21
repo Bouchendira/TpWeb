@@ -1,0 +1,78 @@
+<main class="main-wrapper">
+
+  <!-- LEFT PANEL -->
+  <section class="left-panel">
+    <div class="hero-content">
+      <h1>Welcome Back 👋</h1>
+      <p>Access your AI research platform and continue exploring knowledge.</p>
+    </div>
+  </section>
+
+  <!-- RIGHT PANEL -->
+  <section class="right-panel">
+    <div class="form-box">
+
+      <header>
+        <h2>Login</h2>
+        <p class="subtitle">Sign in to continue</p>
+      </header>
+
+      <!-- ERROR GLOBAL -->
+      <div class="error-text" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+        <!-- USERNAME -->
+        <div class="field">
+          <input
+            id="username"
+            type="text"
+            formControlName="username"
+            placeholder="Username"
+            autocomplete="username"
+          />
+
+          <small class="error-text"
+            *ngIf="loginForm.get('username')?.touched && loginForm.get('username')?.hasError('required')">
+            Username is required
+          </small>
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="field">
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            placeholder="Password"
+            autocomplete="current-password"
+          />
+
+          <small class="error-text"
+            *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')">
+            Password is required
+          </small>
+        </div>
+
+        <!-- BUTTON -->
+        <button type="submit" class="submit-btn" [disabled]="loading">
+          <span *ngIf="!loading">Login</span>
+          <span *ngIf="loading">Loading...</span>
+        </button>
+
+      </form>
+
+      <!-- SIGNUP LINK -->
+      <footer class="create-account">
+        <span>No account?</span>
+        <a routerLink="/signup" (click)="onCreateAccount($event)">
+          Create one
+        </a>
+      </footer>
+
+    </div>
+  </section>
+
+</main>

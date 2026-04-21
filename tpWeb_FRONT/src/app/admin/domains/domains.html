@@ -1,0 +1,52 @@
+<h2>Gestion des Domaines</h2>
+
+<!-- 🔍 SEARCH + CLASSIFICATION -->
+<input [(ngModel)]="searchText" placeholder="Rechercher par nom">
+
+<select [(ngModel)]="classification">
+  <option value="">Toutes les classifications</option>
+
+  <option *ngFor="let c of classifications" [value]="c">
+    {{ c }}
+  </option>
+</select>
+
+<button (click)="search()">Search / Filter</button>
+<button (click)="load(); searchText=''; classification=''">Reset</button>
+
+<hr>
+
+<!-- FORM -->
+<input [(ngModel)]="form.nom" placeholder="Nom">
+<input [(ngModel)]="form.description" placeholder="Description">
+<input [(ngModel)]="form.classification" placeholder="Classification">
+
+<br><br>
+
+<button *ngIf="selectedId === null" (click)="add()">Ajouter</button>
+<button *ngIf="selectedId !== null" (click)="update()">Modifier</button>
+<button (click)="reset()">Annuler</button>
+
+<hr>
+
+<!-- TABLE -->
+<table border="1" width="100%">
+  <tr>
+    <th>ID</th>
+    <th>Nom</th>
+    <th>Description</th>
+    <th>Classification</th>
+    <th>Actions</th>
+  </tr>
+
+  <tr *ngFor="let d of domains">
+    <td>{{ d.id }}</td>
+    <td>{{ d.nom }}</td>
+    <td>{{ d.description }}</td>
+    <td>{{ d.classification }}</td>
+    <td>
+      <button (click)="edit(d)">Edit</button>
+      <button (click)="delete(d.id)">Delete</button>
+    </td>
+  </tr>
+</table>

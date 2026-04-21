@@ -1,0 +1,17 @@
+<h2>Gestion des comptes</h2>
+
+<table>
+  <tr>
+    <th>Username</th>
+    <th>Role</th>
+    <th>Actions</th>
+  </tr>
+
+  <tr *ngFor="let u of users">
+    <td>{{ u.username }}</td>
+    <td>{{ u.role }}</td>
+    <td>
+      <button (click)="deleteUser(u.id)">Supprimer</button>
+    </td>
+  </tr>
+</table>
